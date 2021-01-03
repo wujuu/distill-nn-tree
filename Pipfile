@@ -1,0 +1,19 @@
+[[source]]
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+tensorflow = "==1.15"
+matplotlib = ">=2.1.0"
+h5py = "==2.9.0"
+jupyter = "*"
+ipykernel = "*"
+seaborn = "*"
+pydot = "*"
+graphviz = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.7"

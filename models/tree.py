@@ -132,7 +132,7 @@ class OutputLayer(Layer):
 
 
 class SoftBinaryDecisionTree(object):
-    def __init__(self, max_depth, n_features, n_classes,
+    def __init__(self, max_depth, n_features, n_classes, model_name,
                  penalty_strength=10.0, penalty_decay=0.5, inv_temp=0.01,
                  ema_win_size=100, learning_rate=3e-4, metrics=['acc']):
         '''Initialize model instance by saving parameter values
@@ -140,6 +140,7 @@ class SoftBinaryDecisionTree(object):
         '''
 
         # save hyperparameters
+        self.model_name = model_name
         self.max_depth = max_depth
         self.n_features = n_features
         self.n_classes = n_classes
@@ -260,29 +261,30 @@ class SoftBinaryDecisionTree(object):
         DIR_DISTILL = 'distilled/'
         DIR_NON_DISTILL = 'non-distilled/'
         DIR_MODEL = DIR_ASSETS + (DIR_DISTILL if distill else DIR_NON_DISTILL)
-        PATH_MODEL = DIR_MODEL + 'tree-model'
+        PATH_MODEL = DIR_MODEL + self.model_name + '/' + 'tree-model'
 
-        try:
-            print('Loading trained model from {}.'.format(PATH_MODEL))
-            self.load_variables(sess, PATH_MODEL)
-            return
-        except ValueError as e:
-            print('{} is not a valid checkpoint. Training from scratch.'.format(
-                PATH_MODEL))
-            x_train, y_train = data_train
-            self.initialize_variables(sess, x_train, batch_size)
-            self.model.fit(
-                x_train, y_train, validation_data=data_valid,
-                batch_size=batch_size, epochs=epochs, callbacks=callbacks)
-            print('Saving trained model to {}.'.format(PATH_MODEL))
-            if not os.path.isdir(DIR_MODEL):
-                os.mkdir(DIR_MODEL)
-            self.save_variables(sess, PATH_MODEL)
+        # try:
+        #     print('Loading trained model from {}.'.format(PATH_MODEL))
+        #     self.load_variables(sess, PATH_MODEL)
+        #     return
+        # except ValueError as e:
+        print('{} is not a valid checkpoint. Training from scratch.'.format(
+            PATH_MODEL))
+        x_train, y_train = data_train
+        self.initialize_variables(sess, x_train, batch_size)
+        self.model.fit(
+            x_train, y_train, validation_data=data_valid,
+            batch_size=batch_size, epochs=epochs, callbacks=callbacks)
+        print('Saving trained model to {}.'.format(PATH_MODEL))
+        if not os.path.isdir(DIR_MODEL):
+            os.mkdir(DIR_MODEL)
+        self.save_variables(sess, PATH_MODEL)
 
     def evaluate(self, x, y, batch_size):
         if self.model and self.initialized:
             score = self.model.evaluate(x, y, batch_size)
-            print('accuracy: {:.2f}% | loss: {}'.format(100*score[1], score[0]))
+            # print('accuracy: {:.2f}% | loss: {}'.format(100*score[1], score[0]))
+            return score[1]
         else:
             print('Missing initialized model instance.')
 

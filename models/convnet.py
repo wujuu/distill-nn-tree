@@ -39,7 +39,26 @@ class ConvNet(object):
         latent = MaxPooling2D(pool_size=(2, 2))(latent)
         latent = Dropout(rate=0.25)(latent)
         latent = Flatten()(latent)
-        latent = Dense(units=128, activation='relu')(latent)
+        latent = Dense(units=64, activation='relu')(latent)
+        latent = Dense(units=512, activation='relu')(latent)
+        latent = Dense(units=512, activation='relu')(latent)
+        latent = Dense(units=512, activation='relu')(latent)
+        latent = Dense(units=512, activation='relu')(latent)
+        latent = Dense(units=256, activation='relu')(latent)
+        latent = Dense(units=256, activation='relu')(latent)
+        latent = Dense(units=256, activation='relu')(latent)
+        latent = Dense(units=256, activation='relu')(latent)
+        latent = Dense(units=256, activation='relu')(latent)
+        latent = Dense(units=256, activation='relu')(latent)
+        latent = Dense(units=256, activation='relu')(latent)
+        latent = Dense(units=256, activation='relu')(latent)
+        latent = Dense(units=256, activation='relu')(latent)
+        latent = Dense(units=256, activation='relu')(latent)
+        latent = Dense(units=256, activation='relu')(latent)
+        latent = Dense(units=256, activation='relu')(latent)
+        latent = Dense(units=256, activation='relu')(latent)
+        latent = Dense(units=256, activation='relu')(latent)
+        latent = Dense(units=256, activation='relu')(latent)
         latent = Dropout(rate=0.5)(latent)
         output_layer = Dense(units=self.n_classes, activation='softmax')(latent)
 
@@ -48,10 +67,12 @@ class ConvNet(object):
         self.model.compile(optimizer=self.optimizer, loss=self.loss,
                            metrics=self.metrics)
 
-    def maybe_train(self, data_train, data_valid, batch_size, epochs):
+        print(self.model.summary())
+
+    def maybe_train(self, data_train, data_valid, batch_size, epochs, model_name, callbacks):
 
         DIR_ASSETS = 'assets/'
-        PATH_MODEL = DIR_ASSETS + 'nn-model.hdf5'
+        PATH_MODEL = DIR_ASSETS + f'{model_name}.hdf5'
 
         if os.path.exists(PATH_MODEL):
             print('Loading trained model from {}.'.format(PATH_MODEL))
@@ -62,7 +83,7 @@ class ConvNet(object):
             self.build_model()
             x_train, y_train = data_train
             self.model.fit(x_train, y_train, validation_data=data_valid,
-                           batch_size=batch_size, epochs=epochs)
+                           batch_size=batch_size, epochs=epochs, callbacks=callbacks)
             print('Saving trained model to {}.'.format(PATH_MODEL))
             if not os.path.isdir(DIR_ASSETS):
                 os.mkdir(DIR_ASSETS)
@@ -71,7 +92,8 @@ class ConvNet(object):
     def evaluate(self, x, y):
         if self.model:
             score = self.model.evaluate(x, y)
-            print('accuracy: {:.2f}% | loss: {}'.format(100*score[1], score[0]))
+            # print('accuracy: {:.2f}% | loss: {}'.format(100*score[1], score[0]))
+            return score[1]
         else:
             print('Missing model instance.')
 
